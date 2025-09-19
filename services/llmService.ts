@@ -8,21 +8,25 @@ import type {
   ApiResponse,
   DocumentType
 } from '@/types'
+import { config } from '@/config/app.config'
+import { logger } from '@/utils/logger'
+import { metrics } from '@/utils/metrics'
 
 export class LLMService {
   private client: AxiosInstance
   private baseURL: string
   private apiKey?: string
 
-  constructor(baseURL: string, apiKey?: string) {
-    this.baseURL = baseURL
-    this.apiKey = apiKey
+  constructor(baseURL?: string, apiKey?: string) {
+    const llmConfig = config.getApiConfig('llm')
+    this.baseURL = baseURL || llmConfig.baseURL
+    this.apiKey = apiKey || llmConfig.apiKey
     this.client = axios.create({
-      baseURL,
-      timeout: 120000, // 2 minutes for LLM processing
+      baseURL: this.baseURL,
+      timeout: llmConfig.timeout,
       headers: {
         'Content-Type': 'application/json',
-        ...(apiKey && { Authorization: `Bearer ${apiKey}` })
+        ...(this.apiKey && { Authorization: `Bearer ${this.apiKey}` })
       }
     })
 
@@ -33,22 +37,52 @@ export class LLMService {
   private setupInterceptors(): void {
     this.client.interceptors.request.use(
       (config) => {
-        console.log(`[LLM] Request: ${config.method?.toUpperCase()} ${config.url}`)
+        const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        config.metadata = { startTime: Date.now(), requestId }
+
+        logger.logApiRequest(config.method?.toUpperCase() || 'UNKNOWN', config.url || '', {
+          component: 'LLMService',
+          requestId
+        })
+
         return config
       },
       (error) => {
-        console.error('[LLM] Request error:', error)
+        logger.error('LLM request setup failed', error, { component: 'LLMService' })
         return Promise.reject(error)
       }
     )
 
     this.client.interceptors.response.use(
       (response) => {
-        console.log(`[LLM] Response: ${response.status} ${response.statusText}`)
+        const duration = Date.now() - (response.config.metadata?.startTime || 0)
+        const requestId = response.config.metadata?.requestId
+
+        logger.logApiResponse(
+          response.config.method?.toUpperCase() || 'UNKNOWN',
+          response.config.url || '',
+          response.status,
+          duration,
+          { component: 'LLMService', requestId }
+        )
+
+        metrics.recordApiCall('llm', response.config.url || '', response.config.method || '', response.status, duration)
+
         return response
       },
       (error) => {
-        console.error('[LLM] Response error:', error.response?.data || error.message)
+        const duration = Date.now() - (error.config?.metadata?.startTime || 0)
+        const requestId = error.config?.metadata?.requestId
+        const status = error.response?.status || 0
+
+        logger.error('LLM API error', error, {
+          component: 'LLMService',
+          requestId,
+          metadata: { status, duration }
+        })
+
+        metrics.recordApiCall('llm', error.config?.url || '', error.config?.method || '', status, duration)
+
         return Promise.reject(this.handleApiError(error))
       }
     )
@@ -82,7 +116,17 @@ export class LLMService {
     input: DocumentInput,
     template?: PromptTemplate
   ): Promise<EnrichedDocument> {
+    const startTime = Date.now()
+    const requestId = `enrich_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
     try {
+      logger.info('Starting document enrichment', {
+        component: 'LLMService',
+        operation: 'enrichDocument',
+        requestId,
+        metadata: { documentType: input.type, hasTemplate: !!template }
+      })
+
       const prompt = this.generatePrompt(input, template)
       const llmRequest: LLMRequest = {
         prompt,
@@ -101,9 +145,35 @@ export class LLMService {
       }
 
       const llmResponse = response.data.data
-      return this.parseEnrichedDocument(input, llmResponse)
+      const enrichedDoc = this.parseEnrichedDocument(input, llmResponse)
+
+      const duration = Date.now() - startTime
+      const tokenCount = this.estimateTokenCount(llmRequest.prompt)
+
+      logger.logBusinessEvent('document-enriched', {
+        documentType: input.type,
+        tokenCount,
+        duration,
+        confidence: enrichedDoc.metadata.confidence
+      }, { component: 'LLMService', requestId })
+
+      metrics.recordLLMRequest(llmResponse.model || 'unknown', tokenCount, duration, true)
+      metrics.recordDocumentOperation('enrich', input.type, true)
+
+      return enrichedDoc
     } catch (error) {
-      console.error('[LLM] Document enrichment failed:', error)
+      const duration = Date.now() - startTime
+
+      logger.error('Document enrichment failed', error instanceof Error ? error : undefined, {
+        component: 'LLMService',
+        operation: 'enrichDocument',
+        requestId,
+        metadata: { documentType: input.type, duration }
+      })
+
+      metrics.recordLLMRequest('unknown', 0, duration, false)
+      metrics.recordDocumentOperation('enrich', input.type, false)
+
       throw error
     }
   }
@@ -360,10 +430,26 @@ Always respond with valid JSON following the specified schema. Ensure all sectio
 
   async testConnection(): Promise<boolean> {
     try {
+      logger.debug('Testing LLM service connection', { component: 'LLMService' })
       const response = await this.client.get('/health')
-      return response.status === 200
-    } catch {
+      const success = response.status === 200
+
+      logger.info(`LLM service connection test: ${success ? 'SUCCESS' : 'FAILED'}`, {
+        component: 'LLMService',
+        metadata: { status: response.status }
+      })
+
+      return success
+    } catch (error) {
+      logger.error('LLM service connection test failed', error instanceof Error ? error : undefined, {
+        component: 'LLMService'
+      })
       return false
     }
+  }
+
+  private estimateTokenCount(text: string): number {
+    // Rough estimation: ~4 characters per token
+    return Math.ceil(text.length / 4)
   }
 }

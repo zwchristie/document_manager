@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "data": {
+    "hasChanges": true,
+    "confidence": 0.85,
+    "changes": [
+      {
+        "section": "description",
+        "type": "modification",
+        "oldValue": "Original description text...",
+        "newValue": "Updated description with new information...",
+        "significance": "medium"
+      },
+      {
+        "section": "sections.Implementation Details",
+        "type": "addition",
+        "newValue": "New implementation details section content...",
+        "significance": "medium"
+      }
+    ],
+    "recommendation": "update-existing"
+  },
+  "timestamp": "2025-09-18T10:00:00Z"
+}

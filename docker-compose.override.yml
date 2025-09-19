@@ -1,0 +1,32 @@
+# Development override configuration
+version: '3.8'
+
+services:
+  document-manager:
+    build:
+      target: base
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - ENABLE_TRACING=true
+    command: npm run dev
+    ports:
+      - "3000:3000"
+      - "9090:9090"
+      - "24678:24678" # Vite HMR port
+
+  # Remove production health checks in development
+  llm-service:
+    environment:
+      - DEBUG=true
+
+  qa-service:
+    environment:
+      - DEBUG=true
+
+  doc-service:
+    environment:
+      - DEBUG=true

@@ -1,343 +1,342 @@
-# Document Manager Micro Frontend
+# Document Manager
 
-A sophisticated document management micro frontend application designed to capture, enrich, and structure technical documentation for RAG (Retrieval-Augmented Generation) knowledge bases.
+A production-ready micro front-end application for LLM-powered documentation enrichment and RAG knowledge base ingestion with comprehensive observability and automated deployment.
 
-## 🎯 Purpose
+## 🚀 Quick Start
 
-Transform natural language descriptions into enriched, structured documentation while automatically preventing duplicates through intelligent drift detection. Perfect for enterprise environments managing 20+ interdependent modules and services.
+### Automated Setup
 
-## ✨ Key Features
+#### Linux/macOS
+```bash
+./scripts/setup.sh
+```
 
-- **🤖 AI-Powered Enrichment**: Leverages custom LLM endpoints to transform basic descriptions into comprehensive documentation
-- **🔍 Smart Drift Detection**: Automatically identifies similar existing documentation and manages content evolution
-- **🧩 Micro Frontend Architecture**: Embeds seamlessly into existing applications
-- **📊 Structured Output**: Generates LLM-optimized content for RAG knowledge bases
-- **🔧 Flexible Configuration**: Supports custom prompt templates and document types
-- **⚡ Real-time Processing**: Provides live status updates and error handling
+#### Windows
+```powershell
+.\scripts\setup.ps1
+```
+
+### Manual Setup
+
+1. **Prerequisites**
+   - Node.js 18+
+   - npm 8+
+   - Docker 20+ (optional)
+
+2. **Install Dependencies**
+   ```bash
+   npm ci
+   ```
+
+3. **Configure Environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API endpoints
+   ```
+
+4. **Start Development**
+   ```bash
+   npm run dev
+   ```
 
 ## 🏗️ Architecture
 
 ### Core Components
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Host Application                       │
-│  ┌─────────────────────────────────────────────────────┐ │
-│  │          Document Manager Micro Frontend           │ │
-│  │                                                     │ │
-│  │  ┌─────────────────┐  ┌─────────────────────────┐   │ │
-│  │  │   UI Components │  │    State Management     │   │ │
-│  │  │                 │  │     (Zustand Store)     │   │ │
-│  │  │ - DocumentForm  │  │                         │   │ │
-│  │  │ - DriftResolver │  │ - documentState         │   │ │
-│  │  │ - StatusPanel   │  │ - apiState              │   │ │
-│  │  └─────────────────┘  │ - driftDetectionState   │   │ │
-│  │                       └─────────────────────────┘   │ │
-│  │                                                     │ │
-│  │  ┌─────────────────────────────────────────────────┐ │ │
-│  │  │                Service Layer                    │ │ │
-│  │  │                                                 │ │ │
-│  │  │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ │ │
-│  │  │ │LLM Service  │ │Q&A Service  │ │Doc Service  │ │ │ │
-│  │  │ │             │ │             │ │             │ │ │ │
-│  │  │ │- enrich()   │ │- search()   │ │- save()     │ │ │ │
-│  │  │ │- prompt()   │ │- compare()  │ │- update()   │ │ │ │
-│  │  │ └─────────────┘ └─────────────┘ └─────────────┘ │ │ │
-│  │  └─────────────────────────────────────────────────┘ │ │
-│  └─────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
+- **Document Input & Enrichment**: Natural language to structured documentation
+- **Drift Detection**: Intelligent duplicate detection and content comparison
+- **Micro Frontend**: Embeddable component for existing applications
+- **API Integration**: LLM, Q&A, and Document services
+
+### Infrastructure Features
+
+- **🔧 Configuration Management**: Centralized, validated configuration with environment support
+- **📊 Observability**: Structured logging, metrics collection, and health monitoring
+- **🐳 Containerization**: Production-ready Docker setup with multi-stage builds
+- **📈 Monitoring**: Prometheus metrics and Grafana dashboards
+- **🔄 Automation**: Setup, development, and deployment scripts
+- **🛡️ Security**: Input sanitization, rate limiting, and secure defaults
+
+## 📋 Available Scripts
+
+### Development
+```bash
+npm run dev              # Start development server
+npm run dev:helper       # Development helper commands
+npm run docker:up        # Start with Docker Compose
+npm run docker:down      # Stop Docker services
 ```
 
-### Document Types Supported
+### Testing & Quality
+```bash
+npm run test             # Run unit tests
+npm run test:coverage    # Run tests with coverage
+npm run test:ui          # Run tests with UI
+npm run lint             # Run linting
+npm run lint:fix         # Fix linting issues
+npm run typecheck        # Run TypeScript checks
+```
 
-- **Microservices**: Service architecture, APIs, dependencies, deployment
-- **API Endpoints**: Request/response formats, authentication, error handling
-- **Business Logic**: Rules, decision flows, data transformations
-- **System Architecture**: Component relationships, data flow, scalability
-- **Database Schema**: Table structures, relationships, constraints
-- **Configuration**: Parameters, environment settings, deployment options
-- **Security Policies**: Controls, compliance, risk mitigation
+### Build & Deploy
+```bash
+npm run build            # Production build
+npm run build:lib        # Library build
+npm run preview          # Preview production build
+npm run deploy           # Deploy application
+```
 
-## 🚀 Quick Start
+### Setup & Maintenance
+```bash
+npm run setup            # Automated setup (Linux/macOS)
+npm run setup:windows    # Automated setup (Windows)
+```
 
-### Installation
+## 🐳 Docker Deployment
+
+### Development Environment
+```bash
+docker-compose up -d
+```
+
+### Production Environment
+```bash
+docker-compose -f docker-compose.yml up -d
+```
+
+### Services Included
+- **Document Manager**: Main application (:3000)
+- **Mock APIs**: LLM (:8001), Q&A (:8002), Document (:8003)
+- **Redis**: Caching layer (:6379)
+- **Prometheus**: Metrics collection (:9091)
+- **Grafana**: Metrics visualization (:3001)
+
+## 📊 Monitoring & Observability
+
+### Health Checks
+```bash
+curl http://localhost:3000/health
+```
+
+### Metrics
+- **Prometheus**: http://localhost:9091
+- **Grafana**: http://localhost:3001 (admin/admin)
+- **Application Metrics**: http://localhost:9090/metrics
+
+### Logs
+```bash
+# View all logs
+docker-compose logs -f
+
+# View specific service
+docker-compose logs -f document-manager
+
+# Development helper
+./scripts/dev.sh logs
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env` file from `.env.example`:
 
 ```bash
-npm install @company/document-manager
-# or
-yarn add @company/document-manager
+# Application
+APP_NAME=Document Manager
+NODE_ENV=development
+PORT=3000
+LOG_LEVEL=info
+
+# API Endpoints
+LLM_API_URL=http://localhost:8001
+QA_API_URL=http://localhost:8002
+DOC_API_URL=http://localhost:8003
+
+# Feature Flags
+ENABLE_METRICS=true
+ENABLE_TRACING=false
+ENABLE_HEALTH_CHECKS=true
+
+# Security
+ENABLE_RATE_LIMIT=true
+MAX_REQUESTS_PER_MINUTE=100
 ```
 
-### Basic Usage
+### Configuration Management
 
-```typescript
-import DocumentManagerEmbed from '@company/document-manager'
-
-// Initialize the micro frontend
-const documentManager = new DocumentManagerEmbed()
-
-// Configure and mount
-await documentManager.mount(document.getElementById('container')!, {
-  apiEndpoints: {
-    llm: 'https://api.company.com/llm',
-    qa: 'https://api.company.com/qa', 
-    storage: 'https://api.company.com/storage'
-  },
-  theme: 'auto',
-  defaultDocumentType: 'microservice',
-  features: {
-    enableDriftDetection: true,
-    enableAutoSave: false,
-    enablePreview: true,
-    enableMetadataValidation: true
-  },
-  callbacks: {
-    onDocumentSaved: (document) => {
-      console.log('Document saved:', document.id)
-    },
-    onError: (error) => {
-      console.error('Error occurred:', error.message)
-    },
-    onStepChange: (step) => {
-      console.log('Processing step:', step)
-    }
-  }
-})
-
-// Event listeners
-documentManager.onDocumentSaved((document) => {
-  // Handle successful document creation
-  updateKnowledgeBase(document)
-})
-
-documentManager.onError((error) => {
-  // Handle errors
-  showErrorNotification(error.message)
-})
-
-// Cleanup
-// documentManager.unmount()
-```
-
-### Advanced Configuration
-
-```typescript
-import { DocumentManagerEmbed, PromptTemplate } from '@company/document-manager'
-
-const customPrompts: PromptTemplate[] = [
-  {
-    id: 'custom-microservice',
-    name: 'Custom Microservice Template',
-    documentType: 'microservice',
-    systemPrompt: 'You are an expert in our company architecture...',
-    userPromptTemplate: `
-      Create documentation for {{serviceName}} microservice:
-      
-      Content: {{content}}
-      Dependencies: {{dependencies}}
-      
-      Include our standard sections:
-      - Service Overview
-      - API Contracts
-      - Deployment Guide
-      - Monitoring & Alerts
-    `,
-    outputSchema: { /* JSON schema */ },
-    examples: [],
-    version: '2.0'
-  }
-]
-
-const config = {
-  apiEndpoints: {
-    llm: process.env.REACT_APP_LLM_ENDPOINT!,
-    qa: process.env.REACT_APP_QA_ENDPOINT!,
-    storage: process.env.REACT_APP_STORAGE_ENDPOINT!
-  },
-  customPromptTemplates: customPrompts,
-  features: {
-    enableDriftDetection: true,
-    enableAutoSave: true,
-    enablePreview: true,
-    enableMetadataValidation: true
-  }
-}
-```
-
-## 📋 API Reference
-
-### DocumentManagerEmbed
-
-#### Methods
-
-- `mount(container: HTMLElement, config: EmbedConfig): Promise<void>`
-- `unmount(): void`
-- `updateConfig(config: Partial<EmbedConfig>): void`
-- `reset(): void`
-- `checkHealth(): Promise<HealthStatus>`
-
-#### Event Handlers
-
-- `onDocumentSaved(callback): () => void`
-- `onError(callback): () => void`
-- `onStepChange(callback): () => void`
-
-### Configuration Types
-
-```typescript
-interface EmbedConfig {
-  apiEndpoints: {
-    llm: string        // LLM enrichment endpoint
-    qa: string         // Q&A search endpoint  
-    storage: string    // Document storage endpoint
-  }
-  theme?: 'light' | 'dark' | 'auto'
-  defaultDocumentType?: DocumentType
-  customPromptTemplates?: PromptTemplate[]
-  features?: {
-    enableDriftDetection: boolean
-    enableAutoSave: boolean
-    enablePreview: boolean
-    enableMetadataValidation: boolean
-  }
-  callbacks?: {
-    onDocumentSaved?: (document: EnrichedDocument) => void
-    onError?: (error: Error) => void
-    onStepChange?: (step: ProcessingStep) => void
-    onDriftDetected?: (analysis: DriftAnalysis) => void
-  }
-}
-```
-
-## 🔄 Document Processing Workflow
-
-1. **Input**: User provides natural language description + metadata
-2. **Enrichment**: LLM processes content using engineered prompts
-3. **Preview**: User reviews enriched documentation
-4. **Drift Check**: System searches for similar existing documents
-5. **Analysis**: If matches found, analyzes content differences
-6. **Resolution**: User decides: update existing, create new, or merge
-7. **Storage**: Final document saved to knowledge base
-
-## 🔧 Development
-
-### Prerequisites
-
-- Node.js 18+
-- TypeScript 5+
-- React 18+
-
-### Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Run tests
-npm test
-
-# Build for production
-npm run build
-
-# Build as library
-npm run build:lib
-```
-
-### Project Structure
-
-```
-document_manager/
-├── src/
-│   ├── components/          # React components
-│   ├── services/           # API integration services
-│   ├── store/              # Zustand state management
-│   └── index.ts            # Main library exports
-├── components/             # Shared UI components
-├── services/              # Business logic services
-├── types/                 # TypeScript type definitions
-├── utils/                 # Utility functions
-└── dev-context/           # Development documentation
-```
+The application uses a centralized configuration system with:
+- Zod-based validation
+- Environment-specific settings
+- Type-safe configuration objects
+- Hot reloading capabilities
 
 ## 🧪 Testing
 
+### Running Tests
 ```bash
 # Unit tests
-npm test
+npm run test
 
-# Integration tests
-npm run test:integration
-
-# E2E tests
-npm run test:e2e
-
-# Coverage report
+# With coverage
 npm run test:coverage
+
+# Watch mode
+npm run test -- --watch
+
+# UI mode
+npm run test:ui
 ```
 
-## 📦 Building & Deployment
+### Test Structure
+- **Unit Tests**: Component and utility testing
+- **Integration Tests**: API service testing
+- **Health Checks**: System validation
 
-### Library Build
+## 🚀 Deployment
 
+### Automated Deployment
 ```bash
-npm run build:lib
+# Full deployment
+./scripts/deploy.sh deploy
+
+# Build only
+./scripts/deploy.sh build
+
+# Docker deployment
+ENVIRONMENT=docker ./scripts/deploy.sh deploy
 ```
 
-Generates:
-- `dist/document-manager.es.js` - ES modules
-- `dist/document-manager.umd.js` - UMD bundle
-- `dist/index.d.ts` - TypeScript definitions
-
-### Docker Deployment
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist ./dist
-EXPOSE 3000
-CMD ["npm", "start"]
+### Environment Configuration
+```bash
+# Production deployment
+ENVIRONMENT=production \
+DOCKER_REGISTRY=your-registry.com \
+TAG=v1.0.0 \
+./scripts/deploy.sh deploy
 ```
 
-## 🔒 Security Considerations
+### Rollback
+```bash
+ROLLBACK_TAG=v0.9.0 ./scripts/deploy.sh rollback
+```
 
-- All API endpoints should use HTTPS
-- Implement proper authentication headers
-- Validate and sanitize all user inputs
-- Rate limit LLM API calls
-- Audit log document changes
-- Secure prompt injection prevention
+## 🛠️ Development Tools
 
-## 🚀 Performance Optimization
+### Development Helper Script
+```bash
+# Start development environment
+./scripts/dev.sh start
 
-- Lazy load components for faster initial render
-- Implement virtual scrolling for large document lists
-- Cache enriched documents locally
-- Debounce search and validation calls
-- Use React.memo for expensive components
+# Run tests with specific type
+./scripts/dev.sh test coverage
+
+# Lint and fix issues
+./scripts/dev.sh lint fix
+
+# Health check
+./scripts/dev.sh health
+
+# Environment status
+./scripts/dev.sh status
+
+# Clean and reset
+./scripts/dev.sh reset
+```
+
+### Available Commands
+- `start` - Start development environment
+- `stop` - Stop development environment
+- `restart` - Restart development environment
+- `logs [service]` - View logs
+- `test [type]` - Run tests
+- `lint [mode]` - Run linting
+- `typecheck` - TypeScript checking
+- `build [type]` - Build application
+- `clean` - Clean artifacts
+- `reset` - Reset environment
+- `health` - Health check
+- `status` - Environment status
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **Port Conflicts**
+   ```bash
+   # Check port usage
+   lsof -i :3000
+   ```
+
+2. **Docker Issues**
+   ```bash
+   # Check Docker status
+   docker info
+
+   # Reset Docker environment
+   docker-compose down -v
+   ```
+
+3. **Permission Issues**
+   ```bash
+   # Fix script permissions
+   chmod +x scripts/*.sh
+   ```
+
+4. **Environment Configuration**
+   ```bash
+   # Validate configuration
+   npm run typecheck
+   ```
+
+### Debug Mode
+```bash
+# Enable debug logging
+LOG_LEVEL=debug npm run dev
+
+# Enable tracing
+ENABLE_TRACING=true npm run dev
+```
+
+## 📚 Documentation
+
+- **[Project Overview](./dev-context/project-overview.md)**: Comprehensive project documentation
+- **[Architecture Design](./dev-context/architecture-design.md)**: Technical architecture details
+- **[Infrastructure Setup](./dev-context/infrastructure-setup.md)**: Infrastructure and DevOps documentation
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create a feature branch
+3. Run tests and linting
+4. Submit a pull request
 
-## 📝 License
+### Development Workflow
+```bash
+# Setup development environment
+./scripts/setup.sh
+
+# Start development
+./scripts/dev.sh start
+
+# Run quality checks
+./scripts/dev.sh test
+./scripts/dev.sh lint
+./scripts/dev.sh typecheck
+
+# Health check before commit
+./scripts/dev.sh health
+```
+
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🔗 Links
 
-- 📖 [Documentation](./dev-context/)
-- 🐛 [Issue Tracker](https://github.com/company/document-manager/issues)
-- 💬 [Discussions](https://github.com/company/document-manager/discussions)
+- **Repository**: [GitHub](https://github.com/your-company/document-manager)
+- **Issues**: [GitHub Issues](https://github.com/your-company/document-manager/issues)
+- **Documentation**: [Wiki](https://github.com/your-company/document-manager/wiki)
 
 ---
 
-Built with ❤️ for enterprise documentation management
+**Document Manager** - Making documentation creation frictionless for developers with LLM-powered enrichment and intelligent drift detection.

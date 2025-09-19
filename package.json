@@ -13,12 +13,21 @@
     "build": "tsc && vite build",
     "build:lib": "vite build --mode lib",
     "preview": "vite preview",
+    "start": "npm run preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "setup": "./scripts/setup.sh",
+    "setup:windows": "powershell -ExecutionPolicy Bypass -File ./scripts/setup.ps1",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:build": "docker-compose build",
+    "deploy": "./scripts/deploy.sh",
+    "dev:helper": "./scripts/dev.sh"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -26,7 +35,10 @@
     "zustand": "^4.5.5",
     "axios": "^1.7.7",
     "clsx": "^2.1.1",
-    "diff": "^5.2.0"
+    "diff": "^5.2.0",
+    "zod": "^3.23.8",
+    "pino": "^8.21.0",
+    "pino-pretty": "^11.2.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.11",
